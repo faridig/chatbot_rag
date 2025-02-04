@@ -1,14 +1,18 @@
+"""
+Module de téléchargement des documents HAL
+"""
+
 import os
 import requests
 import hashlib
 from io import BytesIO
 import PyPDF2
-from ..utils.logger import setup_logger
+from ..utils.logger import setup_logging
 from ..utils.data_cleaner import DataCleaner
 
 class HALDownloader:
     def __init__(self, db_manager):
-        self.logger = setup_logger('hal_downloader')
+        self.logger = setup_logging()
         self.db_manager = db_manager
         self.data_cleaner = DataCleaner()
         self.downloads_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'downloads')

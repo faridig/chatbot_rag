@@ -1,7 +1,8 @@
 """
-Utilitaires pour CHATBOT_RAG
+Initialisation du package utils
 """
 
-from .logger import setup_logger
+from .logger import setup_logging
+from .data_cleaner import DataCleaner
 
-__all__ = ['setup_logger'] 
+__all__ = ['setup_logging', 'DataCleaner'] 

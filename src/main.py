@@ -5,22 +5,14 @@ Point d'entrée principal du CHATBOT_RAG - Version simplifiée
 
 import os
 import sys
+from pathlib import Path
 
 # Ajouter le répertoire racine au PYTHONPATH
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(str(Path(__file__).parent.parent))
 
 from src.database.manager import DatabaseManager
 from src.hal.downloader import HALDownloader
-import logging
-
-def configurer_logging():
-    """Configure le système de logging basique"""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    return logging.getLogger(__name__)
+from src.utils.logger import setup_logging
 
 def afficher_menu():
     """Affiche le menu principal"""
@@ -32,41 +24,55 @@ def afficher_menu():
     return input("Choisissez une option (1-4): ")
 
 def main():
-    logger = configurer_logging()
-    db = DatabaseManager()
+    # Configuration du logging
+    logger = setup_logging()
+    logger.info("Démarrage de l'application")
     
-    while True:
-        choix = afficher_menu()
+    try:
+        # Initialisation de la base de données
+        db = DatabaseManager()
+        logger.info("Base de données initialisée")
         
-        try:
-            if choix == "1":
-                logger.info("Démarrage du téléchargement...")
-                downloader = HALDownloader(db)
-                downloader.download_documents()
-                
-            elif choix == "2":
-                stats = db.obtenir_statistiques()
-                print("\n=== Statistiques ===")
-                print(f"Documents totaux: {stats['total_documents']}")
-                for statut, nombre in stats['documents_par_statut'].items():
-                    print(f"{statut}: {nombre}")
+        while True:
+            choix = afficher_menu()
+            
+            try:
+                if choix == "1":
+                    logger.info("Démarrage du téléchargement...")
+                    downloader = HALDownloader(db)
+                    downloader.download_documents()
+                    logger.info("Téléchargement terminé")
                     
-            elif choix == "3":
-                confirmation = input("Êtes-vous sûr de vouloir réinitialiser ? (oui/non): ")
-                if confirmation.lower() == "oui":
-                    db.reset_database()
-                    print("Base de données réinitialisée.")
+                elif choix == "2":
+                    stats = db.obtenir_statistiques()
+                    print("\n=== Statistiques ===")
+                    print(f"Documents totaux: {stats['total_documents']}")
+                    for statut, nombre in stats['documents_par_statut'].items():
+                        print(f"{statut}: {nombre}")
                     
-            elif choix == "4":
-                print("Au revoir!")
-                break
+                elif choix == "3":
+                    confirmation = input("Êtes-vous sûr de vouloir réinitialiser ? (oui/non): ")
+                    if confirmation.lower() == "oui":
+                        db.reset_database()
+                        logger.info("Base de données réinitialisée")
+                        print("Base de données réinitialisée avec succès.")
+                    
+                elif choix == "4":
+                    logger.info("Arrêt de l'application")
+                    print("Au revoir!")
+                    break
+                    
+                else:
+                    print("Option invalide. Veuillez réessayer.")
+                    
+            except Exception as e:
+                logger.error(f"Erreur lors de l'exécution de l'option {choix}: {str(e)}")
+                print("Une erreur est survenue. Consultez les logs pour plus de détails.")
                 
-            else:
-                print("Option invalide. Veuillez réessayer.")
-                
-        except Exception as e:
-            logger.error(f"Erreur: {str(e)}")
-            print("Une erreur est survenue. Consultez les logs pour plus de détails.")
+    except Exception as e:
+        logger.error(f"Erreur critique: {str(e)}")
+        print("Erreur critique. Impossible de continuer.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main() 

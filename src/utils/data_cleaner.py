@@ -5,11 +5,11 @@ Module de nettoyage et normalisation des données pour CHATBOT_RAG
 import re
 from datetime import datetime
 from typing import Dict, Any
-from .logger import setup_logger
+from .logger import setup_logging
 
 class DataCleaner:
     def __init__(self):
-        self.logger = setup_logger('data_cleaner')
+        self.logger = setup_logging()
 
     def clean_text(self, text: str) -> str:
         """Nettoie un texte"""
@@ -110,4 +110,33 @@ class DataCleaner:
             raise ValueError("Le nombre de pages ne peut pas être négatif")
 
         if data.get('taille_fichier', 0) < 0:
-            raise ValueError("La taille du fichier ne peut pas être négative") 
+            raise ValueError("La taille du fichier ne peut pas être négative")
+
+    def _clean_text(self, text):
+        """Nettoie un texte"""
+        if not text:
+            return ""
+            
+        # Suppression des caractères spéciaux
+        text = re.sub(r'[^\w\s.,;:!?()-]', ' ', text)
+        # Suppression des espaces multiples
+        text = re.sub(r'\s+', ' ', text)
+        return text.strip()
+    
+    def _format_date(self, date_str):
+        """Formate une date"""
+        if not date_str:
+            return ""
+            
+        try:
+            # Essai de plusieurs formats de date
+            for fmt in ('%Y-%m-%d', '%Y/%m/%d', '%d-%m-%Y', '%d/%m/%Y'):
+                try:
+                    return datetime.strptime(date_str, fmt).strftime('%Y-%m-%d')
+                except ValueError:
+                    continue
+            return date_str
+            
+        except Exception as e:
+            self.logger.error(f"Erreur lors du formatage de la date {date_str}: {e}")
+            return date_str 

@@ -5,9 +5,9 @@ setup(
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
-        "requests",
-        "sqlite3",
-        "logging",
+        "requests>=2.31.0",
+        "PyPDF2>=3.0.0",
+        "python-dotenv>=1.0.0",
     ],
     author="Votre Nom",
     author_email="votre.email@example.com",

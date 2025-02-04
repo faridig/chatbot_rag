@@ -1,5 +1,5 @@
 """
-Module d'interaction avec l'API HAL pour CHATBOT_RAG
+Initialisation du package hal
 """
 
 from .downloader import HALDownloader
